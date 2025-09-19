@@ -1,9 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, StatusBar, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Dimensions, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+  Dimensions,
+  Animated,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 import { buscarApi, obterDetalhesErro } from '../services/api';
 import { usarAutenticacao } from '../services/AuthContext';
-import { colors, typography, spacing, borders, shadows, componentStyles } from '../styles/globalStyles';
+import { typography, spacing, borders, shadows } from '../styles/globalStyles';
+import { makeRedirectUri } from 'expo-auth-session';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,151 +33,102 @@ export default function TelaLogin({ navigation }) {
   const [senha, setSenha] = useState('');
   const [emailFocado, setEmailFocado] = useState(false);
   const [senhaFocada, setSenhaFocada] = useState(false);
-  const [carregando, setCarregando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   // Animações
-  const animacaoFade = useRef(new Animated.Value(0)).current;
-  const animacaoDeslizar = useRef(new Animated.Value(50)).current;
-  const animacaoLogo = useRef(new Animated.Value(0)).current;
-  const animacaoFormulario = useRef(new Animated.Value(30)).current;
-  const animacaoBotao = useRef(new Animated.Value(0)).current;
+  const animFade = useRef(new Animated.Value(0)).current;
+  const animSlide = useRef(new Animated.Value(50)).current;
+  const animLogo = useRef(new Animated.Value(0)).current;
+  const animForm = useRef(new Animated.Value(30)).current;
+  const animBotao = useRef(new Animated.Value(0)).current;
+
+  const isWeb = Platform.OS === 'web';
+
+  // Configuração do Google Auth
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: Platform.select({
+      web: '1028772176202-111ftj99ppitr6f168g72qjh4kkbrumg.apps.googleusercontent.com',
+      android: '1028772176202-4sdj5b9eccnpg9kp0ol66bqc0e2kinlo.apps.googleusercontent.com',
+      ios: '1028772176202-a2mf4jm85645elcc63pbc5f6kb6rbl90.apps.googleusercontent.com',
+      default: '1028772176202-4sdj5b9eccnpg9kp0ol66bqc0e2kinlo.apps.googleusercontent.com'
+    }),
+    redirectUri: makeRedirectUri({
+      useProxy: true, // necessário no Expo Go
+    }),
+  });
 
   useEffect(() => {
-    // Animação de entrada
     Animated.parallel([
-      Animated.timing(animacaoFade, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.spring(animacaoDeslizar, {
-        toValue: 0,
-        tension: 50,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-      Animated.spring(animacaoLogo, {
-        toValue: 1,
-        tension: 80,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-      Animated.spring(animacaoFormulario, {
-        toValue: 0,
-        tension: 60,
-        friction: 8,
-        useNativeDriver: true,
-      }),
+      Animated.timing(animFade, { toValue: 1, duration: 1000, useNativeDriver: true }),
+      Animated.spring(animSlide, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
+      Animated.spring(animLogo, { toValue: 1, tension: 80, friction: 6, useNativeDriver: true }),
+      Animated.spring(animForm, { toValue: 0, tension: 60, friction: 8, useNativeDriver: true }),
     ]).start();
 
-    // Animação do botão após um delay
     setTimeout(() => {
-      Animated.spring(animacaoBotao, {
-        toValue: 1,
-        tension: 100,
-        friction: 8,
-        useNativeDriver: true,
-      }).start();
+      Animated.spring(animBotao, { toValue: 1, tension: 100, friction: 8, useNativeDriver: true }).start();
     }, 800);
   }, []);
 
-  // Validação de email
-  const validarEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      loginComGoogle(id_token);
+    }
+  }, [response]);
 
-  // Validação de senha
-  const validarSenha = (senha) => {
-    return senha.length >= 6;
-  };
+  async function loginComGoogle(idToken) {
+    try {
+      setCarregando(true);
+      const dados = await buscarApi('/api/usuarios/login/google', {
+        method: 'POST',
+        body: { idToken },
+      });
+      await entrar(dados.token, dados.usuario);
+      navigation.replace('Principal');
+    } catch (erro) {
+      Alert.alert('Erro Google', 'Não foi possível fazer login com Google.');
+      console.error(erro);
+    } finally {
+      setCarregando(false);
+    }
+  }
 
-  // Validar formulário
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validarSenha = (senha) => senha.length >= 6;
+
   const validarFormulario = () => {
-    if (!email.trim()) {
-      Alert.alert('Campo obrigatório', 'Por favor, insira seu email');
-      return false;
-    }
-
-    if (!validarEmail(email.trim())) {
-      Alert.alert('Email inválido', 'Por favor, insira um email válido');
-      return false;
-    }
-
-    if (!senha.trim()) {
-      Alert.alert('Campo obrigatório', 'Por favor, insira sua senha');
-      return false;
-    }
-
-    if (!validarSenha(senha)) {
-      Alert.alert('Senha inválida', 'A senha deve ter pelo menos 6 caracteres');
-      return false;
-    }
-
+    if (!email.trim()) return Alert.alert('Campo obrigatório', 'Insira seu email'), false;
+    if (!validarEmail(email.trim())) return Alert.alert('Email inválido', 'Insira um email válido'), false;
+    if (!senha.trim()) return Alert.alert('Campo obrigatório', 'Insira sua senha'), false;
+    if (!validarSenha(senha)) return Alert.alert('Senha inválida', 'Mínimo 6 caracteres'), false;
     return true;
   };
 
-  // Lidar com login
   async function lidarComLogin() {
     if (!validarFormulario()) return;
 
-    // Verificar conectividade
     if (!conectado) {
-      Alert.alert(
-        'Sem conexão', 
-        'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.',
-        [
-          { text: 'OK' },
-          { text: 'Tentar novamente', onPress: () => navigation.navigate('Login') }
-        ]
-      );
-      return;
+      return Alert.alert('Sem conexão', 'Servidor inacessível. Verifique internet.', [
+        { text: 'OK' },
+        { text: 'Tentar novamente', onPress: () => navigation.navigate('Login') },
+      ]);
     }
 
     setCarregando(true);
-
     try {
-      const dados = await buscarApi('/api/autenticacao/entrar', { 
-        method: 'POST', 
-        body: { 
-          email: email.trim().toLowerCase(), 
-          senha 
-        } 
+      const dados = await buscarApi('/api/autenticacao/entrar', {
+        method: 'POST',
+        body: { email: email.trim().toLowerCase(), senha },
       });
-
       await entrar(dados.token, dados.usuario);
-      
-      // Limpar campos
       setEmail('');
       setSenha('');
-      
-      // Navegar para tela principal
       navigation.replace('Principal');
-      
     } catch (erro) {
-      console.error('❌ Erro no login:', erro);
-      
-      let mensagem = 'Erro ao fazer login. Tente novamente.';
-      
-      if (erro.status === 401) {
-        mensagem = 'Email ou senha incorretos. Verifique suas credenciais.';
-      } else if (erro.status === 404) {
-        mensagem = 'Serviço de autenticação não disponível.';
-      } else if (erro.status === 500) {
-        mensagem = 'Erro interno do servidor. Tente novamente mais tarde.';
-      } else if (erro.message) {
-        mensagem = erro.message;
-      }
-
-      // Mostrar detalhes do erro se disponível
-      const detalhes = obterDetalhesErro(erro);
-      if (detalhes && detalhes !== mensagem) {
-        mensagem += `\n\nDetalhes: ${detalhes}`;
-      }
-
-      Alert.alert('Erro no Login', mensagem);
-      
+      const msg = obterDetalhesErro(erro) || 'Falha ao autenticar';
+      Alert.alert('Erro no login', msg);
     } finally {
       setCarregando(false);
     }
@@ -166,125 +137,55 @@ export default function TelaLogin({ navigation }) {
   return (
     <View style={estilos.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />
-      
-      {/* Background com gradiente e elementos decorativos */}
-      <View style={estilos.containerBackground}>
-        <View style={estilos.circuloGradiente1} />
-        <View style={estilos.circuloGradiente2} />
-        <View style={estilos.circuloGradiente3} />
-        <View style={estilos.elementosFlutuantes}>
-          <View style={estilos.pontoFlutuante} />
-          <View style={estilos.linhaFlutuante} />
-          <View style={estilos.pontoFlutuante} />
-        </View>
-      </View>
-
-      <KeyboardAvoidingView 
-        style={estilos.containerTeclado} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView 
-          contentContainerStyle={estilos.conteudoRolagem}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Header com logo animado */}
-          <Animated.View 
-            style={[
-              estilos.cabecalho,
-              {
-                opacity: animacaoFade,
-                transform: [{ translateY: animacaoDeslizar }]
-              }
-            ]}
-          >
-            <Animated.View 
-              style={[
-                estilos.containerLogo,
-                {
-                  transform: [{ scale: animacaoLogo }]
-                }
-              ]}
-            >
-              <View style={estilos.brilhoLogo} />
-              <View style={estilos.circuloLogo}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: spacing.lg }} keyboardShouldPersistTaps="handled">
+          {/* Logo */}
+          <Animated.View style={{ alignItems: 'center', paddingTop: height * 0.08, opacity: animFade, transform: [{ translateY: animSlide }] }}>
+            <Animated.View style={{ transform: [{ scale: animLogo }], alignItems: 'center', marginBottom: spacing.lg }}>
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(0,201,255,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md }}>
                 <MaterialIcons name="restaurant" size={40} color="#00C9FF" />
               </View>
-              <Text style={estilos.textoLogo}>NutriSnap</Text>
+              <Text style={{ fontSize: typography.fontSize['3xl'], fontWeight: typography.fontWeight.black, color: '#fff' }}>NutriSnap</Text>
             </Animated.View>
-            
-            <Text style={estilos.textoBoasVindas}>Bem-vindo de volta!</Text>
-
-            {/* Indicador de conectividade - apenas quando desconectado */}
+            <Text style={{ fontSize: typography.fontSize['2xl'], fontWeight: typography.fontWeight.bold, color: '#fff', textAlign: 'center' }}>Bem-vindo de volta!</Text>
             {!conectado && (
-              <View style={estilos.statusConexao}>
-                <View style={[
-                  estilos.pontoConexao, 
-                  { backgroundColor: '#FF6B6B' }
-                ]} />
-                <Text style={[
-                  estilos.textoConexao,
-                  { color: '#FF6B6B' }
-                ]}>
-                  Servidor não acessível
-                </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF6B6B', marginRight: spacing.sm }} />
+                <Text style={{ color: '#FF6B6B' }}>Servidor não acessível</Text>
               </View>
             )}
           </Animated.View>
 
-          {/* Formulário com animação */}
-          <Animated.View 
-            style={[
-              estilos.containerFormulario,
-              {
-                opacity: animacaoFade,
-                transform: [{ translateY: animacaoFormulario }]
-              }
-            ]}
-          >
-            <View style={estilos.grupoInput}>
-              <Text style={estilos.rotuloInput}>Email</Text>
-              <View style={estilos.wrapperInput}>
+          {/* Formulário */}
+          <Animated.View style={{ marginTop: spacing.lg, opacity: animFade, transform: [{ translateY: animForm }] }}>
+            {/* Email */}
+            <View style={{ marginBottom: spacing.lg }}>
+              <Text style={{ color: '#fff', marginBottom: spacing.xs }}>Email</Text>
+              <View style={{ position: 'relative' }}>
                 <TextInput
-                  style={[
-                    estilos.input,
-                    emailFocado && estilos.inputFocado,
-                    email.trim() && !validarEmail(email.trim()) && estilos.inputErro
-                  ]}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.08)', padding: spacing.md, paddingRight: 50, borderRadius: borders.radius.xl, color: '#fff' }}
                   placeholder="seu@email.com"
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
                   value={email}
                   onChangeText={setEmail}
                   onFocus={() => setEmailFocado(true)}
                   onBlur={() => setEmailFocado(false)}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  autoCorrect={false}
                   editable={!carregando}
                 />
-                <MaterialIcons 
-                  name="email" 
-                  size={20} 
-                  color={emailFocado ? "#00C9FF" : "rgba(255, 255, 255, 0.6)"} 
-                  style={estilos.iconeInput}
-                />
+                <MaterialIcons name="email" size={20} color={emailFocado ? "#00C9FF" : "rgba(255,255,255,0.6)"} style={{ position: 'absolute', right: spacing.lg, top: '50%', marginTop: -10 }} />
               </View>
-              {email.trim() && !validarEmail(email.trim()) && (
-                <Text style={estilos.textoErro}>Email deve ter formato válido</Text>
-              )}
             </View>
 
-            <View style={estilos.grupoInput}>
-              <Text style={estilos.rotuloInput}>Senha</Text>
-              <View style={estilos.wrapperInput}>
+            {/* Senha */}
+            <View style={{ marginBottom: spacing.lg }}>
+              <Text style={{ color: '#fff', marginBottom: spacing.xs }}>Senha</Text>
+              <View style={{ position: 'relative' }}>
                 <TextInput
-                  style={[
-                    estilos.input,
-                    senhaFocada && estilos.inputFocado,
-                    senha.trim() && !validarSenha(senha) && estilos.inputErro
-                  ]}
-                  placeholder="••••••••"
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.08)', padding: spacing.md, paddingRight: 50, borderRadius: borders.radius.xl, color: '#fff' }}
+                  placeholder="••••••"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
                   value={senha}
                   onChangeText={setSenha}
                   onFocus={() => setSenhaFocada(true)}
@@ -293,79 +194,35 @@ export default function TelaLogin({ navigation }) {
                   autoCapitalize="none"
                   editable={!carregando}
                 />
-                <TouchableOpacity 
-                  onPress={() => setMostrarSenha(!mostrarSenha)}
-                  style={estilos.botaoIcone}
-                  disabled={carregando}
-                >
-                  <MaterialIcons 
-                    name={mostrarSenha ? "visibility" : "visibility-off"} 
-                    size={20} 
-                    color={senhaFocada ? "#00C9FF" : "rgba(255, 255, 255, 0.6)"} 
-                  />
+                <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)} style={{ position: 'absolute', right: spacing.lg, top: '50%', marginTop: -10 }}>
+                  <MaterialIcons name={mostrarSenha ? "visibility" : "visibility-off"} size={20} color={senhaFocada ? "#00C9FF" : "rgba(255,255,255,0.6)"} />
                 </TouchableOpacity>
               </View>
-              {senha.trim() && !validarSenha(senha) && (
-                <Text style={estilos.textoErro}>Mínimo de 6 caracteres</Text>
-              )}
             </View>
 
-            <Animated.View
-              style={{
-                opacity: animacaoBotao,
-                transform: [{ scale: animacaoBotao }]
-              }}
-            >
-              <TouchableOpacity 
-                onPress={lidarComLogin} 
-                style={[
-                  estilos.botaoLogin,
-                  carregando && estilos.botaoDesabilitado
-                ]}
-                disabled={carregando || !conectado}
-                activeOpacity={0.9}
-              >
-                <View style={estilos.gradienteBotao}>
-                  {carregando ? (
-                    <View style={estilos.botaoComCarregamento}>
-                      <ActivityIndicator color="#FFFFFF" size="small" />
-                      <Text style={estilos.textoBotaoLogin}>Entrando...</Text>
-                    </View>
-                  ) : (
-                    <>
-                      <Text style={estilos.textoBotaoLogin}>Entrar</Text>
-                      <MaterialIcons name="arrow-forward" size={20} color="#FFFFFF" />
-                    </>
-                  )}
-                </View>
+            {/* Botões */}
+            <Animated.View style={{ opacity: animBotao, transform: [{ scale: animBotao }] }}>
+              <TouchableOpacity onPress={lidarComLogin} style={{ backgroundColor: '#00C9FF', padding: spacing.md, borderRadius: borders.radius.full, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: spacing.md, marginBottom: spacing.sm }} disabled={carregando || !conectado}>
+                {carregando ? <ActivityIndicator color="#fff" /> : <><Text style={{ color: '#fff', fontWeight: 'bold' }}>Entrar</Text><MaterialIcons name="arrow-forward" size={20} color="#fff" /></>}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => promptAsync()} style={{ backgroundColor: '#DB4437', padding: spacing.md, borderRadius: borders.radius.full, alignItems: 'center' }} disabled={!request || carregando}>
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Entrar com Google</Text>
               </TouchableOpacity>
             </Animated.View>
-          </Animated.View>
 
-          {/* Links de navegação */}
-          <Animated.View 
-            style={[
-              estilos.containerNavegacao,
-              {
-                opacity: animacaoFade,
-                transform: [{ translateY: animacaoDeslizar }]
-              }
-            ]}
-          >
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('Register')}
-              style={estilos.linkNavegacao}
-              disabled={carregando}
-            >
-              <Text style={estilos.textoLinkNavegacao}>Não tem conta? Cadastre-se</Text>
-            </TouchableOpacity>
+            {/* Cadastro */}
+            <View style={{ alignItems: 'center', marginTop: spacing.lg }}>
+              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                <Text style={{ color: '#00C9FF' }}>Não tem conta? Cadastre-se</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 }
-
 const estilos = StyleSheet.create({
   container: {
     flex: 1,

@@ -4,13 +4,13 @@ import bcrypt from 'bcrypt';
 class UsuariosModel {
 
     /**
-     * Busca os dados completos do perfil de um usuário.
+     * Busca os dados completos do perfil de um usuário pelo ID.
      * @param {number} idUsuario - ID do usuário.
      * @returns {Promise<object|null>} Dados do usuário e quiz, ou null.
      */
     static async buscarPerfilCompleto(idUsuario) {
         const [usuarios] = await bancoDados.query(
-            'SELECT id, nome, email, criado_em FROM usuarios WHERE id = ?',
+            'SELECT id, nome, email, foto, criado_em FROM usuarios WHERE id = ?',
             [idUsuario]
         );
 
@@ -28,7 +28,37 @@ class UsuariosModel {
         if (quizData.length > 0) {
             Object.assign(usuario, quizData[0]);
         }
+
         return usuario;
+    }
+
+    /**
+     * Busca um usuário pelo email.
+     * @param {string} email - Email do usuário.
+     * @returns {Promise<object|null>} Dados do usuário ou null.
+     */
+    static async buscarPorEmail(email) {
+        const [usuarios] = await bancoDados.query(
+            'SELECT id, nome, email, foto, criado_em FROM usuarios WHERE email = ?',
+            [email]
+        );
+        return usuarios[0] || null;
+    }
+
+    /**
+     * Cria um usuário novo via Google OAuth.
+     * @param {object} dados - Dados do usuário.
+     * @param {string} dados.nome - Nome do usuário.
+     * @param {string} dados.email - Email do usuário.
+     * @param {string} [dados.foto] - URL da foto do usuário.
+     * @returns {Promise<number>} ID do usuário criado.
+     */
+    static async criarUsuarioGoogle({ nome, email, foto }) {
+        const [resultado] = await bancoDados.query(
+            'INSERT INTO usuarios (nome, email, foto, criado_em) VALUES (?, ?, ?, CURRENT_TIMESTAMP)',
+            [nome, email, foto || null]
+        );
+        return resultado.insertId;
     }
 
     /**
@@ -43,7 +73,7 @@ class UsuariosModel {
             [dados.nome, dados.email, idUsuario]
         );
 
-        // Atualiza/Insere dados do quiz
+        // Atualiza/insere dados do quiz
         const [quizExistente] = await bancoDados.query(
             'SELECT id FROM meus_dados WHERE id_usuario = ?',
             [idUsuario]
@@ -79,6 +109,7 @@ class UsuariosModel {
      * @param {string} novaSenha - Nova senha em texto puro.
      */
     static async alterarSenha(idUsuario, novaSenha) {
+        if (!novaSenha) return;
         const saltRounds = 10;
         const novaSenhaHash = await bcrypt.hash(novaSenha, saltRounds);
         await bancoDados.query(

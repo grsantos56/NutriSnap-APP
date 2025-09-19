@@ -1,6 +1,29 @@
 {
-  "plugins": [
-    "expo-font",
-    "expo-asset"
-  ]
+  "expo": {
+    "name": "NutriSnap",
+    "slug": "nutrisnap-app",
+    "version": "1.0.0",
+    "scheme": "nutrisnap", 
+    "platforms": ["ios", "android", "web"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gabriel.nutrisnap",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Este aplicativo utiliza a câmera para capturar fotos de alimentos para análise nutricional.",
+        "NSPhotoLibraryUsageDescription": "Este aplicativo precisa acessar sua biblioteca de fotos para selecionar imagens de alimentos para análise nutricional."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.gabriel.nutrisnap"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-asset",
+      "expo-web-browser"
+    ]
+  }
 }
