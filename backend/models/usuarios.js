@@ -10,7 +10,8 @@ class UsuariosModel {
      */
     static async buscarPerfilCompleto(idUsuario) {
         const [usuarios] = await bancoDados.query(
-            'SELECT id, nome, email, foto, criado_em FROM usuarios WHERE id = ?',
+            // CORRIGIDO: Removida a coluna 'foto'
+            'SELECT id, nome, email, criado_em, email_verificado FROM usuarios WHERE id = ?',
             [idUsuario]
         );
 
@@ -38,29 +39,18 @@ class UsuariosModel {
      * @returns {Promise<object|null>} Dados do usuário ou null.
      */
     static async buscarPorEmail(email) {
-        const [usuarios] = await bancoDados.query(
-            'SELECT id, nome, email, foto, criado_em FROM usuarios WHERE email = ?',
+        const [usuarios] = await bancoDados.query( 
+            // CORRIGIDO: Removida a coluna 'foto'
+            'SELECT id, nome, email, criado_em, email_verificado FROM usuarios WHERE email = ?',
             [email]
         );
         return usuarios[0] || null;
     }
 
-    /**
-     * Cria um usuário novo via Google OAuth.
-     * @param {object} dados - Dados do usuário.
-     * @param {string} dados.nome - Nome do usuário.
-     * @param {string} dados.email - Email do usuário.
-     * @param {string} [dados.foto] - URL da foto do usuário.
-     * @returns {Promise<number>} ID do usuário criado.
-     */
-    static async criarUsuarioGoogle({ nome, email, foto }) {
-        const [resultado] = await bancoDados.query(
-            'INSERT INTO usuarios (nome, email, foto, criado_em) VALUES (?, ?, ?, CURRENT_TIMESTAMP)',
-            [nome, email, foto || null]
-        );
-        return resultado.insertId;
-    }
-
+    // =======================================
+    // REMOVIDO: CRIAÇÃO DE USUÁRIO VIA GOOGLE
+    // =======================================
+    
     /**
      * Atualiza os dados de perfil de um usuário.
      * @param {number} idUsuario - ID do usuário.
@@ -129,6 +119,44 @@ class UsuariosModel {
             [idUsuario]
         );
         return usuarios[0]?.senha || null;
+    }
+
+    // =======================================
+    // MARCAR EMAIL VERIFICADO
+    // =======================================
+
+    /**
+     * Marca o email do usuário como verificado no banco de dados.
+     * @param {number} idUsuario - ID do usuário.
+     */
+    static async marcarEmailVerificado(idUsuario) {
+        await bancoDados.query(
+            'UPDATE usuarios SET email_verificado = TRUE, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
+            [idUsuario]
+        );
+    }
+    /**
+     * Cria um novo usuário na tabela principal (usuarios) usando a senha JÁ hasheada.
+     * Este é o 'COMMIT' final do registro.
+     * @param {object} dados - Dados finais do usuário.
+     * @returns {Promise<object>} Dados do usuário criado.
+     */
+    static async criarUsuarioComHash({ nome, email, senha_hash, email_verificado = true }) {
+        const [resultado] = await bancoDados.query(
+            `
+            INSERT INTO usuarios (nome, email, senha, email_verificado) 
+            VALUES (?, ?, ?, ?)
+            `,
+            [nome, email, senha_hash, email_verificado]
+        );
+
+        // Retorna os dados básicos do usuário, incluindo o ID inserido
+        return { 
+            id: resultado.insertId, 
+            nome, 
+            email, 
+            email_verificado
+        };
     }
 }
 

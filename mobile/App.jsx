@@ -24,6 +24,7 @@ import AlterarSenhaScreen from './src/Telas/AlterarSenha';
 import EditarPerfilScreen from './src/Telas/EditarPerfil';
 import FeedBackScreen from './src/Telas/FeedBack'; 
 import AjudaScreen from './src/Telas/Ajuda'; 
+import TelaVerificarEmail from './src/Telas/TelaVerificarEmail';
 
 
 const Stack = createNativeStackNavigator();
@@ -55,6 +56,7 @@ export default function App() {
             <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Ajuda" component={AjudaScreen} options={{ headerShown: false }} />
             <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="VerificarEmail" component={TelaVerificarEmail} options={{ headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
       </ProvedorAutenticacao>

@@ -22,11 +22,6 @@ roteador.put('/perfil', requerAutenticacao, UsuariosController.atualizarPerfil);
  */
 roteador.put('/alterar-senha', requerAutenticacao, UsuariosController.alterarSenha);
 
-/**
- * @route POST /login/google
- * @description Login ou cadastro via Google OAuth
- * @access Público
- */
-roteador.post('/login/google', UsuariosController.loginGoogle);
+
 
 export default roteador;
