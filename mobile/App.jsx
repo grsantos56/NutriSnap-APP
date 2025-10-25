@@ -24,42 +24,44 @@ import AlterarSenhaScreen from './src/Telas/AlterarSenha';
 import EditarPerfilScreen from './src/Telas/EditarPerfil';
 import FeedBackScreen from './src/Telas/FeedBack'; 
 import AjudaScreen from './src/Telas/Ajuda'; 
-import TelaVerificarEmail from './src/Telas/TelaVerificarEmail';
-
+import TelaVerificarEmail from './src/Telas/TelaVerificarEmail'; // Certifique-se de que o caminho é este
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-      <ProvedorAutenticacao>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Splash">
-            <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Quiiz" component={OnboardingScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Principal" component={HomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="IMC" component={BMIScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Metas" component={GoalScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="PlanoTreino" component={WorkoutPlanScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Refeicoes" component={MealsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Diario" component={DiarioScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="MeusDados" component={MeusDadosScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="TermosDeUso" component={TermosDeUsoScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="PoliticaPrivacidade" component={PoliticaPrivacidadeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="SobreApp" component={SobreAppScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="AlterarSenha" component={AlterarSenhaScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Ajuda" component={AjudaScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="VerificarEmail" component={TelaVerificarEmail} options={{ headerShown: false }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ProvedorAutenticacao>
-    </SafeAreaProvider>
-  );
+    return (
+        <SafeAreaProvider>
+            <ProvedorAutenticacao>
+                <NavigationContainer>
+                    <Stack.Navigator initialRouteName="Splash">
+                        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Quiiz" component={OnboardingScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+                        
+                        {/* GARANTINDO O REGISTRO DO VERIFICAR EMAIL */}
+                        <Stack.Screen name="VerificarEmail" component={TelaVerificarEmail} options={{ headerShown: false }} />
+                        
+                        <Stack.Screen name="Principal" component={HomeScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="IMC" component={BMIScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Metas" component={GoalScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="PlanoTreino" component={WorkoutPlanScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Refeicoes" component={MealsScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Diario" component={DiarioScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="MeusDados" component={MeusDadosScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="TermosDeUso" component={TermosDeUsoScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="PoliticaPrivacidade" component={PoliticaPrivacidadeScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="SobreApp" component={SobreAppScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="AlterarSenha" component={AlterarSenhaScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Ajuda" component={AjudaScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ headerShown: false }} />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </ProvedorAutenticacao>
+        </SafeAreaProvider>
+    );
 }

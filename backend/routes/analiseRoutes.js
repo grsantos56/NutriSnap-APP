@@ -5,10 +5,11 @@ import AnaliseController from '../controllers/AnaliseController.js';
 const roteador = express.Router();
 
 /**
- * @route POST /analisar
+ * @route POST /
  * @description Analisa uma refeição a partir de uma imagem em Base64.
  * @access Privado (requer autenticação)
  */
-roteador.post('/analisar', requerAutenticacao, AnaliseController.analisarRefeicao);
+// CORREÇÃO: Altere '/analisar' para '/'
+roteador.post('/', requerAutenticacao, AnaliseController.analisarRefeicao);
 
 export default roteador;

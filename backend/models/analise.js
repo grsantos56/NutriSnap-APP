@@ -11,9 +11,12 @@ class AnaliseModel {
      * @returns {Promise<object>} Objeto JSON com a análise nutricional.
      */
     static async analisarImagemComGemini(dadosImagemBase64, infoAdicionais = {}) {
-        const chave = process.env.GEMINI_API_KEY;
-        if (!chave) {
-            throw new Error('GEMINI_API_KEY não configurada no ambiente.');
+        // CORREÇÃO: Removemos a chave hardcoded e mantemos apenas o ambiente
+        const chave = process.env.GEMINI_API_KEY; 
+        
+        // Verifica se a chave está faltando ou usando um placeholder
+        if (!chave || chave === 'sua_chave_gemini_aqui') { 
+            throw new Error('GEMINI_API_KEY não configurada no arquivo .env.');
         }
 
         const urlApi = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${chave}`;
@@ -96,7 +99,12 @@ class AnaliseModel {
      * @param {object} json - Resposta da API.
      * @returns {object} Dados normalizados.
      */
-    static processarResposta(json) {
+    static async processarResposta(json) {
+        // Verifica se o Gemini retornou um erro (ex: chave inválida ou problema na requisição)
+        if (json.error) {
+            throw new Error(`Erro da API Gemini: ${json.error.message || 'Erro desconhecido.'}`);
+        }
+        
         const texto = json?.candidates?.[0]?.content?.parts?.[0]?.text || "";
         const limpo = texto.replace(/```json|```/g, '').trim();
 
@@ -109,7 +117,8 @@ class AnaliseModel {
         }
 
         if (!dados || !dados.itens || !Array.isArray(dados.itens)) {
-            throw new Error('Resposta inválida do modelo.');
+            // Lança um erro mais específico se a resposta do modelo for inválida
+            throw new Error('Resposta do modelo inválida ou formato inesperado.');
         }
 
         // Normalização dos itens e cálculo dos totais

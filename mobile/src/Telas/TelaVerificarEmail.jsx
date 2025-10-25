@@ -6,13 +6,14 @@ import { usarAutenticacao } from '../services/AuthContext';
 import { typography, spacing, borders, shadows } from '../styles/globalStyles';
 
 const { height } = Dimensions.get('window');
-const TEMPO_REENVIO_SEGUNDOS = 60; // 1 minuto de espera
+const TEMPO_REENVIO_SEGUNDOS = 60;
 
 export default function TelaVerificarEmail({ navigation, route }) {
-    // Captura o email passado da TelaRegistro
     const emailDoUsuario = route.params?.email || '';
     
-    const { entrar } = usarAutenticacao();
+    // Pegando a função 'entrar' do contexto de autenticação
+    const { entrar } = usarAutenticacao(); 
+
     const [codigo, setCodigo] = useState('');
     const [codigoFocado, setCodigoFocado] = useState(false);
     const [carregando, setCarregando] = useState(false);
@@ -22,12 +23,12 @@ export default function TelaVerificarEmail({ navigation, route }) {
     const timerRef = useRef(null);
     const podeReenviar = tempoRestante === 0;
 
-    // --- Efeitos e Animações ---
+    // --- Efeitos e Animações (Sem Alterações) ---
     const animacaoFade = useRef(new Animated.Value(0)).current;
     const animacaoDeslizar = useRef(new Animated.Value(50)).current;
 
     useEffect(() => {
-        iniciarTimer(); // Inicia o timer na montagem
+        iniciarTimer();
         
         Animated.parallel([
             Animated.timing(animacaoFade, { toValue: 1, duration: 1000, useNativeDriver: true }),
@@ -55,7 +56,6 @@ export default function TelaVerificarEmail({ navigation, route }) {
     };
 
     // --- Lógica do Formulário ---
-
     const validarCodigo = (cod) => /^\d{6}$/.test(cod);
 
     async function lidarComVerificacao() {
@@ -66,8 +66,8 @@ export default function TelaVerificarEmail({ navigation, route }) {
         setCarregando(true);
 
         try {
-            // 1. Chamar a rota de verificação
-            await buscarApi('/api/autenticacao/verificar-codigo', {
+            // 1. Chamar a rota de verificação (espera o token e usuário do backend)
+            const resposta = await buscarApi('/api/autenticacao/verificar-codigo', {
                 method: 'POST',
                 body: { 
                     email: emailDoUsuario, 
@@ -75,9 +75,15 @@ export default function TelaVerificarEmail({ navigation, route }) {
                 }
             });
             
-            // 2. SUCESSO: Navega para a tela de Login
-            Alert.alert('Sucesso!', 'Seu email foi verificado! Faça login para continuar.', [
-                 { text: 'OK', onPress: () => navigation.replace('Login') }
+            // 2. Logar o usuário na sessão (AuthContext)
+            await entrar(resposta.token, resposta.usuario); 
+
+            // 3. Informar sucesso e redirecionar para o Quiz
+            Alert.alert('Sucesso!', 'Email verificado e login efetuado! Vamos configurar seu perfil.', [
+                 { 
+                    text: 'Continuar', 
+                    onPress: () => navigation.replace('Quiiz') // Redirecionamento para a tela Quiiz
+                 }
             ]);
 
         } catch (erro) {
