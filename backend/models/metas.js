@@ -55,16 +55,32 @@ class MetasModel {
             frequencia_treino, horario_preferido, restricoes_medicas
         } = dadosQuiz;
 
-        // TMB (Taxa Metabólica Basal)
+        // CORREÇÃO: Conversão explícita de todas as variáveis numéricas para float/number
+        const i_idade = parseFloat(idade) || 25;
+        const p_atual = parseFloat(peso_atual) || 70;
+        const a_altura = parseFloat(altura) || 170; // Assumindo que o campo Quiz fornece CM (ex: 175)
+
+        // TMB (Taxa Metabólica Basal) - Fórmula de Mifflin-St Jeor (com altura em CM)
         let tmb;
         if (sexo === 'masculino') {
-            tmb = 10 * peso_atual + 6.25 * altura * 100 - 5 * idade + 5;
+            tmb = (10 * p_atual) + (6.25 * a_altura) - (5 * i_idade) + 5;
         } else {
-            tmb = 10 * peso_atual + 6.25 * altura * 100 - 5 * idade - 161;
+            tmb = (10 * p_atual) + (6.25 * a_altura) - (5 * i_idade) - 161;
+        }
+        
+        // Verificação de segurança (opcional, mas bom para debug)
+        if (tmb > 5000 || tmb < 1000) {
+            console.warn(`TMB anormal: ${tmb}. Verifique idade/peso/altura nos dados do quiz.`);
         }
 
         // Fator de atividade
-        const fatoresAtividade = { 'sedentario': 1.2, 'leve': 1.375, 'moderado': 1.55, 'ativo': 1.725, 'muito_ativo': 1.9 };
+        const fatoresAtividade = { 
+            'sedentario': 1.2, 
+            'leve': 1.375, 
+            'moderado': 1.55, 
+            'ativo': 1.725, 
+            'muito_ativo': 1.9 
+        };
         const fatorAtividade = fatoresAtividade[nivel_atividade] || 1.55;
         const caloriasManutencao = tmb * fatorAtividade;
 
@@ -93,7 +109,7 @@ class MetasModel {
         const carboidratos_gramas = Math.round((calorias_diarias * carboidratos_percentual) / 4);
         const gorduras_gramas = Math.round((calorias_diarias * gorduras_percentual) / 9);
         const fibras_gramas = Math.round((calorias_diarias / 1000) * 14);
-        const agua_litros = Math.round((peso_atual * 0.033) * 100) / 100;
+        const agua_litros = Math.round((p_atual * 0.033) * 100) / 100; // 33ml por kg (convertido para litros)
 
         const vitaminasMinerais = this.gerarRecomendacoesVitaminas(dadosQuiz);
         const horariosRefeicoes = this.gerarHorariosRefeicoes(horario_preferido);
