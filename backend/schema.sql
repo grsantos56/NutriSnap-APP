@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- NOVO: Tabela para armazenar dados de REGISTRO PENDENTE e código de verificação
+-- Tabela para armazenar dados de REGISTRO PENDENTE e código de verificação
 CREATE TABLE IF NOT EXISTS codigos_verificacao (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS codigos_verificacao (
     codigo VARCHAR(6) NOT NULL,
     expira_em DATETIME NOT NULL,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    -- A CHAVE ESTRANGEIRA (id_usuario) FOI REMOVIDA
 );
 
 -- Tabela: refeicoes

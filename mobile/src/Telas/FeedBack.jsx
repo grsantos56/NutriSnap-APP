@@ -26,7 +26,6 @@ export default function TelaFeedback({ navigation }) {
     const assuntoEmail = assunto.trim() || emailSujeitoPadrao;
     const corpoEmail = `Olá, Kaio! Sou o usuário ${usuario?.nome || 'Anônimo'} (${usuario?.email || 'N/A'})\n\nMinha mensagem:\n\n${mensagem}`;
 
-    // Usar encodeURIComponent para garantir que o texto seja formatado corretamente para a URL
     const url = `mailto:${destinatario}?subject=${encodeURIComponent(assuntoEmail)}&body=${encodeURIComponent(corpoEmail)}`;
 
     try {

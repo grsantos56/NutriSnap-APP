@@ -55,10 +55,10 @@ class MetasModel {
             frequencia_treino, horario_preferido, restricoes_medicas
         } = dadosQuiz;
 
-        // CORREÇÃO: Conversão explícita de todas as variáveis numéricas para float/number
+        // Conversão explícita de todas as variáveis numéricas para float/number
         const i_idade = parseFloat(idade) || 25;
         const p_atual = parseFloat(peso_atual) || 70;
-        const a_altura = parseFloat(altura) || 170; // Assumindo que o campo Quiz fornece CM (ex: 175)
+        const a_altura = parseFloat(altura) || 170; 
 
         // TMB (Taxa Metabólica Basal) - Fórmula de Mifflin-St Jeor (com altura em CM)
         let tmb;
@@ -68,7 +68,7 @@ class MetasModel {
             tmb = (10 * p_atual) + (6.25 * a_altura) - (5 * i_idade) - 161;
         }
         
-        // Verificação de segurança (opcional, mas bom para debug)
+        // Verificação de segurança 
         if (tmb > 5000 || tmb < 1000) {
             console.warn(`TMB anormal: ${tmb}. Verifique idade/peso/altura nos dados do quiz.`);
         }
@@ -84,7 +84,6 @@ class MetasModel {
         const fatorAtividade = fatoresAtividade[nivel_atividade] || 1.55;
         const caloriasManutencao = tmb * fatorAtividade;
 
-        // Ajuste calórico
         let deficit_surplus;
         if (objetivo === 'emagrecer') {
             deficit_surplus = -500;

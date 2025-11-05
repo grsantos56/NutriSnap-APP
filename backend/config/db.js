@@ -42,7 +42,6 @@ async function testarConexao() {
     console.log('   3. Verifique se o banco "nutrisnap" existe');
     console.log('   4. Execute: mysql -u root -p < schema.sql');
     
-    // Em desenvolvimento, não encerrar o processo
     if (process.env.NODE_ENV === 'production') {
       process.exit(1);
     }

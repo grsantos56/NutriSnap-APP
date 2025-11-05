@@ -47,9 +47,6 @@ class UsuariosModel {
         return usuarios[0] || null;
     }
 
-    // =======================================
-    // REMOVIDO: CRIAÇÃO DE USUÁRIO VIA GOOGLE
-    // =======================================
     
     /**
      * Atualiza os dados de perfil de um usuário.

@@ -10,7 +10,6 @@ import path from 'path';
 
 console.log('🚀 Configurando NutriSnap Backend...\n');
 
-// --- 1. SEU ESQUEMA SQL COMPLETO ---
 // O comando 'USE nutrisnap;' é CRÍTICO para o script funcionar
 const schemaSQL = `
 CREATE DATABASE IF NOT EXISTS nutrisnap DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -131,7 +130,7 @@ async function configurarBanco() {
         console.log('✅ Banco de dados "nutrisnap" e tabelas criadas/atualizadas!');
 
 
-        // --- Verificação de Coluna Opcional (mantida para robustez) ---
+        // --- Verificação de Coluna Opcional  ---
         // Garante que a conexão está no contexto do banco
         await conexao.query('USE nutrisnap');
         

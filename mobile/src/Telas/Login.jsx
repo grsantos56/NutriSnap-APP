@@ -15,15 +15,9 @@ import {
   Animated,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-// REMOVIDO: import * as Google from 'expo-auth-session/providers/google';
-// REMOVIDO: import * as WebBrowser from 'expo-web-browser';
-// REMOVIDO: import Constants from 'expo-constants';
 import { buscarApi, obterDetalhesErro } from '../services/api';
 import { usarAutenticacao } from '../services/AuthContext';
 import { typography, spacing, borders, shadows } from '../styles/globalStyles';
-// REMOVIDO: import { makeRedirectUri } from 'expo-auth-session';
-
-// REMOVIDO: WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,22 +37,6 @@ export default function TelaLogin({ navigation }) {
   const animForm = useRef(new Animated.Value(30)).current;
   const animBotao = useRef(new Animated.Value(0)).current;
 
-  // REMOVIDO: const isWeb = Platform.OS === 'web';
-
-  // REMOVIDO: Configuração do Google Auth
-  /* REMOVIDO
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: Platform.select({
-      web: '1028772176202-111ftj99ppitr6f168g72qjh4kkbrumg.apps.googleusercontent.com',
-      android: '1028772176202-4sdj5b9eccnpg9kp0ol66bqc0e2kinlo.apps.googleusercontent.com',
-      ios: '1028772176202-a2mf4jm85645elcc63pbc5f6kb6rbl90.apps.googleusercontent.com',
-      default: '1028772176202-4sdj5b9eccnpg9kp0ol66bqc0e2kinlo.apps.googleusercontent.com'
-    }),
-    redirectUri: makeRedirectUri({
-      useProxy: true, // necessário no Expo Go
-    }),
-  });
-  */
 
   useEffect(() => {
     Animated.parallel([
@@ -73,35 +51,7 @@ export default function TelaLogin({ navigation }) {
     }, 800);
   }, []);
 
-  // REMOVIDO: useEffect para lidar com a resposta do Google Auth
-  /* REMOVIDO
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      loginComGoogle(id_token);
-    }
-  }, [response]);
-  */
 
-  // REMOVIDO: Função de loginComGoogle
-  /* REMOVIDO
-  async function loginComGoogle(idToken) {
-    try {
-      setCarregando(true);
-      const dados = await buscarApi('/api/usuarios/login/google', {
-        method: 'POST',
-        body: { idToken },
-      });
-      await entrar(dados.token, dados.usuario);
-      navigation.replace('Principal');
-    } catch (erro) {
-      Alert.alert('Erro Google', 'Não foi possível fazer login com Google.');
-      console.error(erro);
-    } finally {
-      setCarregando(false);
-    }
-  }
-  */
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarSenha = (senha) => senha.length >= 6;
@@ -214,12 +164,6 @@ export default function TelaLogin({ navigation }) {
                 {carregando ? <ActivityIndicator color="#fff" /> : <><Text style={{ color: '#fff', fontWeight: 'bold' }}>Entrar</Text><MaterialIcons name="arrow-forward" size={20} color="#fff" /></>}
               </TouchableOpacity>
 
-              {/* REMOVIDO: Botão de Login com Google */}
-              {/* REMOVIDO: 
-              <TouchableOpacity onPress={() => promptAsync()} style={{ backgroundColor: '#DB4437', padding: spacing.md, borderRadius: borders.radius.full, alignItems: 'center' }} disabled={!request || carregando}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Entrar com Google</Text>
-              </TouchableOpacity> 
-              */}
             </Animated.View>
 
             {/* Cadastro */}
@@ -236,10 +180,8 @@ export default function TelaLogin({ navigation }) {
 }
 
 const estilos = StyleSheet.create({
-  // ... (seus estilos permanecem os mesmos)
   container: {
     flex: 1,
     backgroundColor: '#0A0A0A',
   },
-  // ... (seus estilos permanecem os mesmos)
 });

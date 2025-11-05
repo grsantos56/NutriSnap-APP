@@ -61,7 +61,6 @@ class AuthController {
             }
             res.status(500).json({ 
                 mensagem: 'Erro interno ao iniciar cadastro. Tente novamente.',
-                // Dica: Se o erro for de envio de email, isso será capturado aqui.
                 detalhes: erro.message 
             });
         }
@@ -79,7 +78,7 @@ class AuthController {
                 return res.status(401).json({ mensagem: 'Email ou senha incorretos' });
             }
             
-            // NOVO BLOQUEIO DE SEGURANÇA: Exige verificação de email
+            // BLOQUEIO DE SEGURANÇA: Exige verificação de email
             if (!usuario.email_verificado) {
                 return res.status(403).json({ 
                     mensagem: 'Conta não verificada. Verifique seu email para acessar.',

@@ -128,7 +128,6 @@ export default function TelaRegistro({ navigation }) {
                     body: { email: emailLowerCase }
                 });
                 
-                // >>> REMOVIDO ALERT DE SUCESSO AQUI <<<
 
             } catch (erroEnvio) {
                 // Falha no Envio do Código
@@ -428,7 +427,6 @@ export default function TelaRegistro({ navigation }) {
     );
 }
 
-// Seus estilos (permanecem os mesmos)
 const estilos = StyleSheet.create({
     container: {
       flex: 1,

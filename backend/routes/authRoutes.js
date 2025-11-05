@@ -16,9 +16,6 @@ roteador.post('/registrar', AuthController.registrar);
  */
 roteador.post('/entrar', AuthController.entrar);
 
-// =======================================
-// NOVAS ROTAS DE VERIFICAÇÃO DE EMAIL
-// =======================================
 
 /**
  * @route POST /enviar-codigo

@@ -185,7 +185,7 @@ export async function salvarMetas(token, dados) {
   });
 }
 
-// Nova função para gerar metas nutricionais com IA
+// função para gerar metas nutricionais com IA
 export async function gerarMetasNutricionais(token) {
   return buscarApi('/api/metas/gerar-ia', {
     method: 'POST',
@@ -306,7 +306,7 @@ export async function reautenticarUsuario(tokenAtual) {
   }
 }
 
-// NOVA FUNÇÃO: Alterar a senha do usuário
+// Alterar a senha do usuário
 export async function alterarSenhaAPI(token, senhaAtual, novaSenha) {
   try {
     const resposta = await buscarApi('/api/usuarios/alterar-senha', {

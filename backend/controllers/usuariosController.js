@@ -78,7 +78,7 @@ class UsuariosController {
     }
 
     // =======================================
-    // ENVIAR CÓDIGO DE VERIFICAÇÃO (Novo)
+    // ENVIAR CÓDIGO DE VERIFICAÇÃO
     // =======================================
     static async enviarCodigoVerificacao(req, res) {
         const { email } = req.body;
@@ -88,7 +88,6 @@ class UsuariosController {
 
         try {
             // Buscamos o REGISTRO PENDENTE
-            // Nota: Assumimos que o CodigosModel.buscarRegistroPendente(email) existe
             const registroPendente = await CodigosModel.buscarRegistroPendente(email); 
 
             if (!registroPendente) {
@@ -110,7 +109,7 @@ class UsuariosController {
     }
 
     // =======================================
-    // VERIFICAR CÓDIGO (LÓGICA DE CRIAÇÃO FINAL)
+    // VERIFICAR CÓDIGO
     // =======================================
     static async verificarCodigo(req, res) {
         const { email, codigo } = req.body;
@@ -120,7 +119,6 @@ class UsuariosController {
 
         try {
             // 1. Validar e buscar os dados de registro pendentes
-            // Nota: Assumimos que o CodigosModel.validarEConsumirRegistro(email, codigo) existe
             const registroPendente = await CodigosModel.validarEConsumirRegistro(email, codigo);
 
             if (registroPendente === 'EXPIRADO') {
@@ -132,7 +130,6 @@ class UsuariosController {
             }
 
             // 2. CRIAÇÃO FINAL DO USUÁRIO (COMMIT)
-            // Nota: Assumimos que o UsuariosModel.criarUsuarioComHash existe
             const novoUsuario = await UsuariosModel.criarUsuarioComHash({
                 nome: registroPendente.nome,
                 email: registroPendente.email,

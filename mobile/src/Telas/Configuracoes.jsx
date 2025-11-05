@@ -28,7 +28,6 @@ export default function TelaConfiguracoes({ navigation }) {
   };
 
   const lidarComAlterarSenha = () => {
-    // Agora navega para a tela AlterarSenha
     navigation.navigate('AlterarSenha');
   };
 
@@ -37,17 +36,14 @@ export default function TelaConfiguracoes({ navigation }) {
   };
 
   const lidarComTermos = () => {
-    // Agora navega para a tela TermosDeUso
     navigation.navigate('TermosDeUso'); 
   };
 
   const lidarComPoliticaPrivacidade = () => {
-    // Mude de Alert para navigation.navigate
     navigation.navigate('PoliticaPrivacidade');
   };
 
   const lidarComSobre = () => {
-    // Agora navega para a tela SobreApp
     navigation.navigate('SobreApp');
   };
 

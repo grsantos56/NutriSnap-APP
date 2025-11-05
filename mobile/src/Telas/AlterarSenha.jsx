@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 
 import { usarAutenticacao } from '../services/AuthContext';
-// Certifique-se de que sua função 'alterarSenhaAPI' lança um erro para status 40x e 50x
 import { alterarSenhaAPI, obterDetalhesErro } from '../services/api'; 
 import { colors, typography, spacing, borders, shadows } from '../styles/globalStyles';
 
